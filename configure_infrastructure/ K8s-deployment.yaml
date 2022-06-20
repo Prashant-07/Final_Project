@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capstone-project-deployment
+  labels:
+    app: prashant-final-project-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prashant-final-project-app
+  template:
+    metadata:
+      labels:
+        app: prashant-final-project-app
+    spec:
+      containers:
+        - name: prashant-final-project-app
+          image: black07/prashant-final-project-app
+          ports:
+            - containerPort: 80

@@ -1,0 +1,75 @@
+Description: Creating an Amazon EKS Cluster
+
+Parameters:
+  EnvironmentName :
+    Description : Will be used as prefix
+    Default: Prashant-final-project
+    Type: String
+
+Resources:
+  K8sEKSClusterPerms:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-eks-cluster-perms
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+
+  K8sClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${EnvironmentName}-cluster-instance-profile
+      Path: "/"
+      Roles:
+        - !Ref K8sEKSClusterPerms
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: For Cluster communication
+      VpcId:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  K8sCluster:
+    Type: AWS::EKS::Cluster
+    Properties:
+      Version: "1.19"
+      Name: !Sub ${EnvironmentName}-K8s-cluster
+      RoleArn: !GetAtt K8sEKSClusterPerms.Arn
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub SecurityGroup
+
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${EnvironmentName}-PUB-SUBNET-1
+          - Fn::ImportValue: !Sub ${EnvironmentName}-PUB-SUBNET-2
+
+Outputs:
+  K8sClusterId:
+    Description: K8s Cluster id
+    Value: !Ref K8sCluster
+    Export:
+      Name: !Sub ${EnvironmentName}-K8sCluster
+
+  K8sEKSClusterPerms:
+    Description: Permissions for K8s resource management
+    Value: !GetAtt K8sEKSClusterPerms.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-K8sEKSClusterPerms
+

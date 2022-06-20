@@ -1,0 +1,71 @@
+Description: Creating the nodes for K8s cluster
+
+Parameters:
+  EnvironmentName :
+    Description : Will be used as prefix
+    Default: Prashant-final-project
+    Type: String
+
+  MinNumOfNodes:
+    Default: 1
+    Type: Number
+
+  MaxNumOfNodes:
+    Default: 3
+    Type: Number
+
+  DesiredNumOfNodes:
+    Default: 2
+    Type: Number
+
+  KeyPairName:
+    Description: The EC2 Key Pair to allow SSH access to the instances
+    Default: udacity
+    Type: AWS::EC2::KeyPair::KeyName
+
+Resources:
+  NodesPerms:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub ${EnvironmentName}-nodes-perms
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap [ServicePrincipals, !Ref "AWS::Partition", ec2]
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      Path: /
+
+  Nodes:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: !Sub ${EnvironmentName}-K8s-cluster
+      NodeRole: !GetAtt  NodesPerms.Arn
+      NodegroupName: !Sub ${EnvironmentName}-nodes
+      ScalingConfig:
+        MinSize: !Ref MinNumOfNodes
+        MaxSize: !Ref MaxNumOfNodes
+        DesiredSize: !Ref DesiredNumOfNodes
+      Subnets:
+          - Fn::ImportValue: !Sub ${EnvironmentName}-PUB-SUBNET-1
+          - Fn::ImportValue: !Sub ${EnvironmentName}-PUB-SUBNET-2
+
+Outputs:
+  NodesPerms:
+    Description: Permission to manage nodes
+    Value: !GetAtt  NodesPerms.Arn
+    Export:
+      Name: !Sub ${EnvironmentName}-NodesPerms
+
+  Nodes:
+    Description: The nodes in K8s cluster
+    Value: !Ref Nodes
+    Export:
+      Name: !Sub ${EnvironmentName}-K8s-cluster-Nodes

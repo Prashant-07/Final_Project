@@ -1,0 +1,38 @@
+Description: Creates an EC2 instance to manage the K8s-Cluster
+
+Parameters:
+  EnvironmentName :
+    Description : Will be used as prefix
+    Default: Prashant-final-project
+    Type: String
+
+  SSHKeyName:
+    Description: SSH key for management access
+    Default: udacity
+    Type: String
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-manager-security-group
+      GroupDescription: Allow port 22 for SSH
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  manager:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      SecurityGroups:
+        - Ref: SecurityGroup
+      KeyName: !Ref SSHKeyName
+      ImageId: ami-0729e439b6769d6ab # Using ubuntu 18 LTS as base OS
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-K8s-cluster-manager
+        - Key: Project
+          Value: !Ref EnvironmentName

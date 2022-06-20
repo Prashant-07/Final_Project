@@ -1,0 +1,27 @@
+---
+- name: "Configure the EKS cluster with kubectl"
+  hosts: manager[0]
+  user: ubuntu
+  gather_facts: false
+  become: yes
+
+  tasks:
+    - name: Copying deployment configuration
+      copy:
+        src: "./K8s-deployment.yaml"
+        dest: $HOME
+
+    - name: Applying deployment configuration
+      shell: "./bin/kubectl apply -f K8s-deployment.yaml"
+      args:
+        chdir: $HOME
+
+    - name: Copying service configuration
+      copy:
+        src: "./K8s-cluster-service.yaml"
+        dest: $HOME
+
+    - name: Creating service configuration
+      command: "./bin/kubectl apply -f K8s-cluster-service.yaml"
+      args:
+        chdir: $HOME

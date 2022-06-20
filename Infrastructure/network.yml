@@ -1,9 +1,9 @@
-Description : Creating infrastructure for the app
+Description : Creating network for the application infrastructure
 
 Parameters:
   EnvironmentName :
     Description : Will be used as prefix
-    Default: Prashantfinalproject
+    Default: Prashant-final-project
     Type: String
 
   VPCCIDR :
