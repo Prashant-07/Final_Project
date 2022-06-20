@@ -1,0 +1,175 @@
+Description : Creating infrastructure for the app
+
+Parameters:
+  EnvironmentName :
+    Description : Will be used as prefix
+    Default: Prashantfinalproject
+    Type: String
+
+  VPCCIDR :
+    Default: 174.31.0.0/16
+    Type: String
+
+  PublicSubnet1CIDR:
+    Default : 174.31.0.0/18
+    Type: String
+
+  PublicSubnet2CIDR:
+    Default : 174.31.128.0/18
+    Type: String
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:  !Ref VPCCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-VPC
+
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+
+  VPCGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - '0'
+          - Fn::GetAZs:
+              Ref: AWS::Region
+      CidrBlock:
+        Ref: PublicSubnet1CIDR
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PublicSubnet1
+        # - Key: kubernetes.io/role/elb
+        #   Value: 1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - '1'
+          - Fn::GetAZs:
+              Ref: AWS::Region
+      CidrBlock:
+        Ref: PublicSubnet2CIDR
+      VpcId:
+        Ref: VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-PublicSubnet1
+        # - Key: kubernetes.io/role/elb
+        #   Value: 1
+
+  NATGatewayEIP1:
+    DependsOn:
+      - VPCGatewayAttachment
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+
+  NATGatewayEIP2:
+    DependsOn:
+      - VPCGatewayAttachment
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+
+  NATGateway1:
+    DependsOn:
+      - NATGatewayEIP1
+      - PublicSubnet1
+      - VPCGatewayAttachment
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt 'NATGatewayEIP1.AllocationId'
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-NAT-Gateway-AZ1
+
+  NATGateway2:
+    DependsOn:
+      - NATGatewayEIP2
+      - PublicSubnet2
+      - VPCGatewayAttachment
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt 'NATGatewayEIP2.AllocationId'
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-NAT-Gateway-AZ2
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-Public-Subnets
+        - Key: Network
+          Value: !Sub ${EnvironmentName}-Public
+
+  PublicRoute:
+    DependsOn: VPCGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PubSub1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PubSub2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+Outputs:
+  VPC:
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${EnvironmentName}-VPC
+
+  PublicRouteTable:
+    Description: Public Routing Table
+    Value: !Ref PublicRouteTable
+    Export:
+      Name: !Sub ${EnvironmentName}-PUB-RT
+
+  Subnet1:
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub ${EnvironmentName}-PUB-SUBNET-1
+
+  Subnet2:
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub ${EnvironmentName}-PUB-SUBNET-2
+
+  # SecurityGroup:
+  #   Description: Security group for the cluster control plane communication with worker nodes
+  #   Value: !Ref ControlPlaneSecurityGroup
+  #   Export:
+  #     Name: !Sub ${EnvironmentName}-SCG
