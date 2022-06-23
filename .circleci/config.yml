@@ -51,7 +51,8 @@ jobs:
           name: Uploading Image to Dockerhub
           command: |
             echo "Docker Image: $IMAGE_NAME"
-            echo “$DOCKERHUB_USERNAME” | docker login -u “$DOCKERHUB_USERNAME” — password-stdin
+            echo “Docker username : $DOCKERHUB_USERNAME”
+            docker login -u “$DOCKERHUB_USERNAME” — password-stdin
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
 #            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
 
