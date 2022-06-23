@@ -29,14 +29,15 @@ jobs:
             chmod +x ./hadolint
 
       - run :
+          name : lint docker file
+          command : |
+            ./hadolint Dockerfile
+
+      - run :
           name : lint python app
           command : |
             pylint --disable=R,C,W1203 app.py
 
-      - run :
-          name : lint docker file
-          command : |
-            ./hadolint Dockerfile
 
   docker-upload:
     executor: docker-publisher
