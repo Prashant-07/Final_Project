@@ -5,7 +5,7 @@ executors:
     environment:
       IMAGE_NAME: black07/prashant-final-project-app
     docker:
-      - image: cimg/node:18.4.0
+      - image: circleci/node:latest
 
 jobs:
   tesing-deliverables:
@@ -51,7 +51,8 @@ jobs:
           name: Uploading Image to Dockerhub
           command: |
             echo "Docker Image: $IMAGE_NAME"
-            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
+            echo “$DOCKERHUB_USERNAME” | docker login -u “$DOCKERHUB_USERNAME” — password-stdin
+#            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
 
 workflows:

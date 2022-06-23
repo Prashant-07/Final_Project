@@ -4,8 +4,7 @@ WORKDIR /app
 
 COPY . /app/
 
-RUN pip install --upgrade pip &&\
-    pip install --no-cache-dir --requirement requirements.txt
+RUN pip install --requirement requirements.txt
 
 EXPOSE 80
 
