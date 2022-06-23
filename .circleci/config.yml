@@ -33,6 +33,7 @@ jobs:
       - run :
           name : lint python app
           command : |
+            . env/bin/activate
             pylint --disable=R,C,W1203 app.py
 
 
@@ -51,8 +52,8 @@ jobs:
           name: Uploading Image to Dockerhub
           command: |
             echo "Docker Image: $IMAGE_NAME"
-            echo “Docker username : $DOCKERHUB_USERNAME”
-            docker login -u “$DOCKERHUB_USERNAME” — password-stdin
+            echo "Docker username : $DOCKERHUB_USERNAME"
+            docker login -u "black07" — password-stdin
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
 #            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
 
