@@ -1,14 +1,14 @@
 version: 2.1
 
 executors:
-docker-publisher:
-environment:
-  IMAGE_NAME: black07/prashant-final-project-app
-  docker:
-    — image: circleci/node:latest
-  auth:
-    username: $DOCKERHUB_USERNAME
-    password: $DOCKERHUB_PASSWORD
+  docker-publisher:
+    environment:
+      IMAGE_NAME: black07/prashant-final-project-app
+    docker:
+      - image: circleci/node:latest
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
 
 jobs:
   tesing-deliverables:
@@ -24,9 +24,9 @@ jobs:
             python3 -m venv .env
             .env/bin/activate
             pip install --upgrade pip
-		        pip install -r requirements.txt
-	          wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.23.0/hadolint-Linux-x86_64 &&\
-		        chmod +x ./hadolint
+            pip install -r requirements.txt
+            wget -O ./hadolint https://github.com/hadolint/hadolint/releases/download/v1.23.0/hadolint-Linux-x86_64 &&\
+            chmod +x ./hadolint
 
       - run :
           name : lint python app
@@ -40,11 +40,10 @@ jobs:
 
   docker-upload:
     executor: docker-publisher
-
     steps:
       - checkout
-      — setup_remote_docker
-
+      - setup_remote_docker: 
+          version: 20.10.14
       - run:
           name: Building docker container
           command: |
@@ -63,4 +62,4 @@ workflows:
   default:
     jobs:
       - tesing-deliverables
-      — docker-upload
+      - docker-upload
