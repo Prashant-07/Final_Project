@@ -1,2 +1,2 @@
-Flask
-pylint
+Flask:2.1.2
+pylint:2.14.3
