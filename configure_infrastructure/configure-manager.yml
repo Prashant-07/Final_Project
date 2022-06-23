@@ -1,6 +1,6 @@
 ---
 - name: "Installing and configuring dependencies"
-  hosts: manager
+  hosts: managers
   user: ubuntu
   become: yes
   vars:

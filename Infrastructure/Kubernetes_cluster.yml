@@ -39,7 +39,7 @@ Resources:
     Properties:
       GroupDescription: For Cluster communication
       VpcId:
-        - Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+        Fn::ImportValue: !Sub "${EnvironmentName}-VPC"
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -54,7 +54,7 @@ Resources:
       RoleArn: !GetAtt K8sEKSClusterPerms.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - Fn::ImportValue: !Sub SecurityGroup
+          - !Ref SecurityGroup
 
         SubnetIds:
           - Fn::ImportValue: !Sub ${EnvironmentName}-PUB-SUBNET-1
