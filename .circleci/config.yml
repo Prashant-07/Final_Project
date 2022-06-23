@@ -47,7 +47,7 @@ jobs:
           command: |
             docker build --tag=$IMAGE_NAME:$CIRCLE_WORKFLOW_ID .
             docker image ls
-            docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            echo "$DOCKERHUB_PASSWORD" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
 
       # - run:
