@@ -52,8 +52,8 @@ jobs:
           command: |
             echo "Docker Image: $IMAGE_NAME"
             echo “$DOCKERHUB_USERNAME” | docker login -u “$DOCKERHUB_USERNAME” — password-stdin
-#            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
+#            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
 
 workflows:
   default:
