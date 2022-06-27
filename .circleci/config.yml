@@ -81,7 +81,7 @@ jobs:
           name: Deploy K8s cluster
           command: |
             aws cloudformation deploy \
-              --template-file Infrastructure/kubernetes_cluster.yml \
+              --template-file Infrastructure/Kubernetes_cluster.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-K8s-cluster" \
               --region ${AWS_DEFAULT_REGION} \
