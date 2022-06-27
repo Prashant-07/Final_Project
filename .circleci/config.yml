@@ -53,13 +53,6 @@ jobs:
 
     steps:
       - checkout
-      - run :
-          name: Setting aws creds
-          command: |
-            echo ${AWS_ACCESS_KEY_ID}
-            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-            aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-            aws configure set region ${AWS_DEFAULT_REGION}
 
       - run :
           name: Install dependencies
@@ -101,6 +94,15 @@ jobs:
       - image : amazon/aws-cli
     steps:
       - checkout
+
+      - run :
+          name: Setting aws creds
+          command: |
+            echo ${AWS_ACCESS_KEY_ID}
+            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+            aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+            aws configure set region ${AWS_DEFAULT_REGION}
+
       - run:
           name: Deploy Network for the whole infra
           command: |
