@@ -47,7 +47,7 @@ commands:
             aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-manager
 
 jobs:
-  tesing-deliverables:
+  testing-deliverables:
     docker:
       - image:  python:3.7.3-stretch
 
@@ -90,7 +90,8 @@ jobs:
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
 
   deploy-infra:
-    docker : amazon/aws-cli
+    docker :
+      - image : amazon/aws-cli
     steps:
       - checkout
       - run:
@@ -230,13 +231,13 @@ jobs:
 workflows:
   default:
     jobs:
-      - tesing-deliverables
+      - testing-deliverables
 
       - docker-upload
 
       - deploy-infra:
           requires:
-            - testing-build
+            - testing-deliverables
 
       - setup-manager:
           requires:
