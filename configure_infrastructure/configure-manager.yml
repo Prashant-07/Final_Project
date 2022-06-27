@@ -1,6 +1,6 @@
 ---
 - name: "Installing and configuring dependencies"
-  hosts: managers
+  hosts: manager
   user: ubuntu
   become: yes
   vars:
@@ -11,13 +11,17 @@
   tasks:
     - name : Installing awscli
       shell: pip3 install awscli
+
     - name : Installing Kubectl
       shell: apt update && apt install snapd && snap install kubectl --classic
+
     - name: Set the aws_access_key_id
       shell: "aws configure set aws_access_key_id {{ AWS_ACCESS_KEY_ID }}"
+
     - name: Set the aws_secret_access_key
       shell: "aws configure set aws_secret_access_key {{ AWS_SECRET_ACCESS_KEY }}"
-    - name: Set the default.region
+
+    - name: Set the default region
       shell: "aws configure set default.region {{ AWS_DEFAULT_REGION }}"
 
 - name: "Fetch kubectl config"

@@ -3,9 +3,48 @@ version: 2.1
 executors:
   docker-publisher:
     environment:
-      IMAGE_NAME: black07/prashant-final-project-app
+      IMAGE_NAME: black07/Prashant-final-project-app
     docker:
       - image: circleci/node:latest
+
+commands:
+  destroy_network:
+    steps:
+      - run:
+          name: Destroy network
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
+
+  destroy_cluster:
+    steps:
+      - run:
+          name: Destroy  network and cluster
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-cluster
+
+  destroy_nodes:
+    steps:
+      - run:
+          name: Destroy  network, cluster and nodes
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-cluster
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-nodes
+
+  destroy_manager:
+    steps:
+      - run:
+          name: Destroy  network, cluster, nodes and manager instance
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-cluster
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-nodes
+            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-manager
 
 jobs:
   tesing-deliverables:
@@ -50,16 +89,163 @@ jobs:
             echo "$DOCKERHUB_PASSWORD" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
             docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
 
-      # - run:
-      #     name: Uploading Image to Dockerhub
-      #     command: |
-      #       echo "Docker Image: $IMAGE_NAME"
-      #       echo "Docker username : $DOCKERHUB_USERNAME"
-      #       docker push $IMAGE_NAME:$CIRCLE_WORKFLOW_ID
-#            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
+  deploy-infra:
+    docker : amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Deploy Network for the whole infra
+          command: |
+            aws cloudformation deploy \
+              --template-file Infrastructure/network.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-network" \
+              --region ${AWS_DEFAULT_REGION}
+      - destroy_network
+
+      - run:
+          name: Deploy K8s cluster
+          command: |
+            aws cloudformation deploy \
+              --template-file Infrastructure/kubernetes_cluster.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-K8s-cluster" \
+              --region ${AWS_DEFAULT_REGION} \
+              --capabilities CAPABILITY_NAMED_IAM
+      - destroy_cluster
+
+      - run:
+          name: Deploy Nodes for the above cluster
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/nodes.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-K8s-nodes" \
+              --region ${AWS_DEFAULT_REGION} \
+              --capabilities CAPABILITY_NAMED_IAM
+      - destroy_nodes
+
+      - run:
+          name: Deploy a manager to configure K8s cluster
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/manager.yml \
+              --tags project=${ENVIRONMENT_NAME}-project \
+              --stack-name "${ENVIRONMENT_NAME}-K8s-manager" \
+              --region ${AWS_DEFAULT_REGION}
+      - destroy_manager
+
+      - run:
+          name: Fetching manager's IP for ansible configuration
+          command: |
+            echo [manager] > ~/inventory.txt
+            aws ec2 describe-instances \
+              --region "${AWS_DEFAULT_REGION}" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-manager*" \
+              --output text >> ~/inventory.txt
+            cat ~/inventory.txt
+
+      - destroy_manager
+
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - inventory.txt
+
+  setup-manager:
+    docker:
+      - image: python:3.7.3-stretch
+    steps:
+      - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - "f9:87:53:db:38:3f:1f:cf:d9:16:09:23:26:7b:88:38"
+
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Install dependencies
+          command: |
+            apt install ansible
+      - run:
+          name: Configure server
+          command: |
+            cat ~/inventory.txt
+            cd configure_infrastructure
+            ansible-playbook -i ~/inventory.txt configure-manager.yml
+
+  configure-K8s-cluster:
+    docker:
+      - image: python:3.7.3-stretch
+    steps:
+      - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - "f9:87:53:db:38:3f:1f:cf:d9:16:09:23:26:7b:88:38"
+
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Install dependencies
+          command: |
+            apt install ansible
+
+      - run:
+          name: Configuring K8s cluster
+          command: |
+              cat ~/inventory.txt
+              cd configure_infrastructure
+              ansible-playbook -i ~/inventory.txt configure-cluster.yml
+
+  deploy-app-to-cluster:
+    docker:
+      - image: python:3.7.3-stretch
+    steps:
+      - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - "f9:87:53:db:38:3f:1f:cf:d9:16:09:23:26:7b:88:38"
+
+      - attach_workspace:
+          at: ~/
+
+      - run:
+          name: Install dependencies
+          command: |
+            apt install ansible
+
+      - run:
+          name: Deploy app to K8s cluster
+          command: |
+            cat ~/inventory.txt
+            cd configure_infrastructure
+            ansible-playbook -i ~/inventory.txt deploy-app.yml
 
 workflows:
   default:
     jobs:
       - tesing-deliverables
+
       - docker-upload
+
+      - deploy-infra:
+          requires:
+            - testing-build
+
+      - setup-manager:
+          requires:
+            - deploy-infra
+
+      - configure-K8s-cluster:
+          requires:
+            - setup-manager
+
+      - deploy-app-to-cluster:
+          requires:
+            - configure-K8s-cluster

@@ -16,12 +16,12 @@
       args:
         chdir: $HOME
 
-    - name: Copying service configuration
+    - name: Copying load balancer configuration
       copy:
-        src: "./K8s-cluster-service.yaml"
+        src: "./K8s-cluster-load-balancer.yaml"
         dest: $HOME
 
     - name: Creating service configuration
-      command: "./bin/kubectl apply -f K8s-cluster-service.yaml"
+      command: "./bin/kubectl apply -f K8s-cluster-load-balancer.yaml"
       args:
         chdir: $HOME
