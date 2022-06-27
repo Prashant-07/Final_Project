@@ -3,7 +3,7 @@ version: 2.1
 executors:
   docker-publisher:
     environment:
-      IMAGE_NAME: black07/Prashant-final-project-app
+      IMAGE_NAME: black07/prashant-final-project-app
     docker:
       - image: circleci/node:latest
 
