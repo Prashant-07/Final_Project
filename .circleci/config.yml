@@ -91,7 +91,7 @@ jobs:
           name: Deploy Nodes for the above cluster
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/nodes.yml \
+              --template-file Infrastructure/nodes.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-K8s-nodes" \
               --region ${AWS_DEFAULT_REGION} \
@@ -101,7 +101,7 @@ jobs:
           name: Deploy a manager to configure K8s cluster
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/manager.yml \
+              --template-file Infrastructure/manager.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-K8s-manager" \
               --region ${AWS_DEFAULT_REGION}
