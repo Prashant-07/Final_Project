@@ -92,7 +92,7 @@ jobs:
           name: Deploy Nodes for the above cluster
           command: |
             aws cloudformation deploy \
-              --template-file Infrastructure/nodes.yml \
+              --template-file Infrastructure/Nodes.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-K8s-nodes" \
               --region ${AWS_DEFAULT_REGION} \
