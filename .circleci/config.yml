@@ -8,37 +8,10 @@ executors:
       - image: circleci/node:latest
 
 commands:
-  destroy_network:
+  destroy_environment:
     steps:
       - run:
-          name: Destroy network
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
-
-  destroy_cluster:
-    steps:
-      - run:
-          name: Destroy  network and cluster
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
-            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-cluster
-
-  destroy_nodes:
-    steps:
-      - run:
-          name: Destroy  network, cluster and nodes
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
-            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-cluster
-            aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-K8s-nodes
-
-  destroy_manager:
-    steps:
-      - run:
-          name: Destroy  network, cluster, nodes and manager instance
+          name: Destroy whole infra
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name ${ENVIRONMENT_NAME}-network
@@ -95,14 +68,6 @@ jobs:
     steps:
       - checkout
 
-      - run :
-          name: Setting aws creds
-          command: |
-            echo ${AWS_ACCESS_KEY_ID}
-            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-            aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-            aws configure set region ${AWS_DEFAULT_REGION}
-
       - run:
           name: Deploy Network for the whole infra
           command: |
@@ -111,7 +76,6 @@ jobs:
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-network" \
               --region ${AWS_DEFAULT_REGION}
-      - destroy_network
 
       - run:
           name: Deploy K8s cluster
@@ -122,7 +86,6 @@ jobs:
               --stack-name "${ENVIRONMENT_NAME}-K8s-cluster" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
-      - destroy_cluster
 
       - run:
           name: Deploy Nodes for the above cluster
@@ -133,7 +96,6 @@ jobs:
               --stack-name "${ENVIRONMENT_NAME}-K8s-nodes" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
-      - destroy_nodes
 
       - run:
           name: Deploy a manager to configure K8s cluster
@@ -143,7 +105,6 @@ jobs:
               --tags project=${ENVIRONMENT_NAME}-project \
               --stack-name "${ENVIRONMENT_NAME}-K8s-manager" \
               --region ${AWS_DEFAULT_REGION}
-      - destroy_manager
 
       - run:
           name: Fetching manager's IP for ansible configuration
@@ -156,7 +117,7 @@ jobs:
               --output text >> ~/inventory.txt
             cat ~/inventory.txt
 
-      - destroy_manager
+      - destroy_environment
 
       - persist_to_workspace:
           root: ~/
