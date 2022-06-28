@@ -20,7 +20,7 @@
         chdir: $HOME
 
     - name: Get the LoadBalancer's DNS name
-      shell: "kubectl get svc prashant-final-project-deployment"
+      shell: "kubectl get svc prashant-final-project-app-load-balancer"
       register: elb_dns
       args:
         chdir: $HOME
