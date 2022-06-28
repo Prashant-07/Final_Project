@@ -6,8 +6,10 @@
   become: yes
 
   tasks:
+    - name: Checking Paths
+      shell: "PWD && ls && ls ${PWD} && ls .. && ls ~/"
+
     - name: Copying deployment configuration
-      command: "ls ${PWD} && ls && ls .. && ls ~/"
       copy:
         src: "./K8s-deployment.yml"
         dest: $HOME
