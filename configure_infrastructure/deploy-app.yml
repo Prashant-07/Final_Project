@@ -10,11 +10,11 @@
 
   tasks:
     - name: Deploying image from dockerhub to K8s cluster
-      shell: "kubectl set image deployments/{{ ENVIRONMENT_NAME }}-deployment {{ ENVIRONMENT_NAME }}-app=black07/prashant-final-project-app:{{ CIRCLE_WORKFLOW_ID }}"
+      shell: "kubectl set image deployments/prashant-final-project-deployment prashant-final-project-app=black07/prashant-final-project-app:{{ CIRCLE_WORKFLOW_ID }}"
       args:
         chdir: $HOME
 
     - name: Check if deployment ist successful
-      shell: "kubectl rollout status deployments/{{ ENVIRONMENT_NAME }}-deployment"
+      shell: "kubectl rollout status deployments/prashant-final-project-deployment"
       args:
         chdir: $HOME
