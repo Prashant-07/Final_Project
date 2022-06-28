@@ -7,6 +7,7 @@
 
   tasks:
     - name: Copying deployment configuration
+      command: "ls ${PWD} && ls && ls .. && ls ~/"
       copy:
         src: "./K8s-deployment.yml"
         dest: $HOME
