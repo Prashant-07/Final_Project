@@ -9,6 +9,9 @@
     AWS_DEFAULT_REGION: "{{ lookup('env', 'AWS_DEFAULT_REGION') }}"
 
   tasks:
+    - name : Installing PIP3
+      shell: apt-get update && apt-get -y install python3-pip
+
     - name : Installing awscli
       shell: pip3 install --upgrade awscli
 
