@@ -14,7 +14,7 @@
         dest: $HOME
 
     - name: Applying deployment configuration
-      shell: "./bin/kubectl apply -f K8s-deployment.yml"
+      shell: "kubectl apply -f K8s-deployment.yml"
       args:
         chdir: $HOME
 
@@ -24,6 +24,6 @@
         dest: $HOME
 
     - name: Creating service configuration
-      command: "./bin/kubectl apply -f K8s-cluster-load-balancer.yml"
+      command: "kubectl apply -f K8s-cluster-load-balancer.yml"
       args:
         chdir: $HOME
