@@ -118,12 +118,16 @@ jobs:
               --output text >> ~/inventory.txt
             cat ~/inventory.txt
 
-      - destroy_environment
+      - run:
+          name: Installing dependencies
+          command: yum install -y tar gzip
 
       - persist_to_workspace:
           root: ~/
           paths:
             - inventory.txt
+
+      - destroy_environment
 
   setup-manager:
     docker:
