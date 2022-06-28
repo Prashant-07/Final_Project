@@ -8,20 +8,20 @@
   tasks:
     - name: Copying deployment configuration
       copy:
-        src: "./K8s-deployment.yaml"
+        src: "./K8s-deployment.yml"
         dest: $HOME
 
     - name: Applying deployment configuration
-      shell: "./bin/kubectl apply -f K8s-deployment.yaml"
+      shell: "./bin/kubectl apply -f K8s-deployment.yml"
       args:
         chdir: $HOME
 
     - name: Copying load balancer configuration
       copy:
-        src: "./K8s-cluster-load-balancer.yaml"
+        src: "./K8s-cluster-load-balancer.yml"
         dest: $HOME
 
     - name: Creating service configuration
-      command: "./bin/kubectl apply -f K8s-cluster-load-balancer.yaml"
+      command: "./bin/kubectl apply -f K8s-cluster-load-balancer.yml"
       args:
         chdir: $HOME

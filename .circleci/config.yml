@@ -71,6 +71,7 @@ jobs:
       - run:
           name: Deploy Network for the whole infra
           command: |
+            if aws cloudformation wait stack-exists  --stack-name "${ENVIRONMENT_NAME}-network"
             aws cloudformation deploy \
               --template-file Infrastructure/network.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
@@ -114,7 +115,7 @@ jobs:
             aws ec2 describe-instances \
               --region "${AWS_DEFAULT_REGION}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-manager*" \
+              --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-K8s-cluster-manager*" \
               --output text >> ~/inventory.txt
             cat ~/inventory.txt
 
@@ -145,7 +146,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apt update
             apt install ansible
+
       - run:
           name: Configure server
           command: |
@@ -169,6 +172,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apt update
             apt install ansible
 
       - run:
@@ -194,6 +198,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
+            apt update
             apt install ansible
 
       - run:

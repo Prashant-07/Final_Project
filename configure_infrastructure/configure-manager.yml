@@ -10,7 +10,7 @@
 
   tasks:
     - name : Installing awscli
-      shell: pip3 install awscli
+      shell: pip3 install --upgrade awscli
 
     - name : Installing Kubectl
       shell: apt update && apt install snapd && snap install kubectl --classic
@@ -33,4 +33,4 @@
     ENVIRONMENT_NAME: "{{ lookup('env', 'ENVIRONMENT_NAME') }}"
   pre_tasks:
     - name: Creating a kubeconfig file for the cluster
-      shell: "aws eks update-kubeconfig --region {{ AWS_DEFAULT_REGION }} --name {{ ENVIRONMENT_NAME }}-K8sCluster"
+      shell: "aws eks update-kubeconfig --region {{ AWS_DEFAULT_REGION }} --name {{ ENVIRONMENT_NAME }}-K8s-Cluster"
