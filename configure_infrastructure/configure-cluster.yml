@@ -8,7 +8,6 @@
   tasks:
     - name: Copying deployment configuration
       copy:
-        remote_src: true
         src: "/root/project/configure_infrastructure/K8s-deployment.yml"
         dest: $HOME
 
@@ -19,7 +18,6 @@
 
     - name: Copying load balancer configuration
       copy:
-        remote_src: true
         src: "/root/project/configure_infrastructure/K8s-cluster-load-balancer.yml"
         dest: $HOME
 
