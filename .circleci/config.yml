@@ -155,8 +155,6 @@ jobs:
             cd configure_infrastructure
             ansible-playbook -i ~/inventory.txt configure-manager.yml
 
-      - destroy_environment
-
   configure-K8s-cluster:
     docker:
       - image: python:3.7.3-stretch
@@ -183,8 +181,6 @@ jobs:
               cd configure_infrastructure
               ansible-playbook -i ~/inventory.txt configure-cluster.yml
 
-      - destroy_environment
-
   deploy-app-to-cluster:
     docker:
       - image: python:3.7.3-stretch
@@ -210,8 +206,6 @@ jobs:
             cat ~/inventory.txt
             cd configure_infrastructure
             ansible-playbook -i ~/inventory.txt deploy-app.yml
-
-      - destroy_environment
 
 workflows:
   default:
