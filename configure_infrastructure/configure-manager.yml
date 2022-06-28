@@ -29,7 +29,7 @@
       shell: "aws configure set default.region {{ AWS_DEFAULT_REGION }}"
 
     - name: Set the session token
-      shell: "aws configure set default.region {{ AWS_SESSION_TOKEN }}"
+      shell: "aws configure set aws_session_token {{ AWS_SESSION_TOKEN }}"
 
 - name: "Fetch kubectl config"
   hosts: manager
