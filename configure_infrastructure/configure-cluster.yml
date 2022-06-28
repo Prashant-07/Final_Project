@@ -4,6 +4,8 @@
   user: ubuntu
   gather_facts: false
   become: yes
+  vars:
+    ANSIBLE_HOST_KEY_CHECKING: False
 
   tasks:
     - name: Copying deployment configuration
