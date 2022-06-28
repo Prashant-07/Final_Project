@@ -1,5 +1,7 @@
 apiVersion: v1
 kind: Service
+metadata:
+  name: prashant-final-project-app-load-balancer
 spec:
   type: LoadBalancer
   selector:
