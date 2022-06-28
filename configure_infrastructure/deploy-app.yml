@@ -18,3 +18,13 @@
       shell: "kubectl rollout status deployments/prashant-final-project-deployment"
       args:
         chdir: $HOME
+
+    - name: Get the LoadBalancer's DNS name
+      shell: "kubectl get svc prashant-final-project-deployment"
+      register: elb_dns
+      args:
+        chdir: $HOME
+
+    - name: Application endpoint
+      debug:
+        msg: "Endpoint : {{ elb_dns.stdout }}"
