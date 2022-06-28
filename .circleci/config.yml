@@ -71,7 +71,6 @@ jobs:
       - run:
           name: Deploy Network for the whole infra
           command: |
-            if aws cloudformation wait stack-exists  --stack-name "${ENVIRONMENT_NAME}-network"
             aws cloudformation deploy \
               --template-file Infrastructure/network.yml \
               --tags project=${ENVIRONMENT_NAME}-project \
