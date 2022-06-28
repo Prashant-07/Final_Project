@@ -7,11 +7,11 @@
 
   tasks:
     - name: Checking Paths
-      shell: "PWD && ls && ls ${PWD} && ls .. && ls ~/"
+      shell: "echo ls ~/ && echo ls ~/project && echo ls ~/project/configure_infrastructure/"
 
     - name: Copying deployment configuration
       copy:
-        src: "./K8s-deployment.yml"
+        src: "~/project/configure_infrastructure/K8s-deployment.yml"
         dest: $HOME
 
     - name: Applying deployment configuration
@@ -21,7 +21,7 @@
 
     - name: Copying load balancer configuration
       copy:
-        src: "./K8s-cluster-load-balancer.yml"
+        src: "~/project/configure_infrastructure/K8s-cluster-load-balancer.yml"
         dest: $HOME
 
     - name: Creating service configuration
