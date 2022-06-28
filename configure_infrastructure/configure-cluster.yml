@@ -8,7 +8,7 @@
   tasks:
     - name: Copying deployment configuration
       copy:
-        src: "/root/project/configure_infrastructure/K8s-deployment.yml"
+        src: "K8s-deployment.yml"
         dest: $HOME
 
     - name: Applying deployment configuration
@@ -18,7 +18,7 @@
 
     - name: Copying load balancer configuration
       copy:
-        src: "/root/project/configure_infrastructure/K8s-cluster-load-balancer.yml"
+        src: "K8s-cluster-load-balancer.yml"
         dest: $HOME
 
     - name: Creating service configuration
