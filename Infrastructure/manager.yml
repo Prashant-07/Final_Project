@@ -34,7 +34,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
             #!/bin/bash
-            ln -s /usr/bin/python /usr/bin/python3
+            ln -s /usr/bin/python3 /usr/bin/python
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-K8s-cluster-manager
