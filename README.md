@@ -1,4 +1,4 @@
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Prashant-07/Final_Project/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/Prashant-07/Final_Project/tree/master)
+
 # Cloud Devops Engineer Capstone Project
 Capstone project for Nanodegree in Cloud Devops Engineer
 
