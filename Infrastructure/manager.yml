@@ -31,6 +31,10 @@ Resources:
         - Ref: SecurityGroup
       KeyName: !Ref SSHKeyName
       ImageId: ami-0729e439b6769d6ab # Using ubuntu 18 LTS as base OS
+      UserData:
+        Fn::Base64: !Sub |
+            #!/bin/bash
+            ln -s /usr/bin/python /usr/bin/python3
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-K8s-cluster-manager

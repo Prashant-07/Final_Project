@@ -10,7 +10,7 @@
 
   tasks:
     - name: Deploying image from dockerhub to K8s cluster
-      shell: "kubectl set image deployments/prashant-final-project-deployment prashant-final-project-app=black07/prashant-final-project-app:{{ CIRCLE_WORKFLOW_ID }}"
+      shell: "kubectl set image deployments/prashant-final-project-deployment prashant-final-project-app=black07/prashant-final-project-app"
       args:
         chdir: $HOME
 
@@ -19,9 +19,9 @@
       args:
         chdir: $HOME
 
-    - name: Waiting for application setup
-      ansible.builtin.pause:
-          minutes: 2
+    - name: Waiting for app deployment to be ready
+      pause:
+        minutes: 2
 
     - name: Get the LoadBalancer's DNS name
       shell: "kubectl get svc prashant-final-project-app-load-balancer"
